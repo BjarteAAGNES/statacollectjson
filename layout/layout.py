@@ -1,16 +1,37 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
+
 def create_layout():
     return dbc.Container([
-        html.H2("📂 Stata graph collection viewer", className="my-3"),
+        html.H2("📂 Stata collection viewer", className="my-3"),
 
         # Info textbox below title
         html.Div(
-            "Browse a Stata graph collection JSON definition. Default filtering is derived from layout showing only data related to statistics defined in results, omiting base levels.",
-            style={"marginBottom": "1rem", "fontStyle": "italic", "color": "#555"}
-        ),
+            [
+                "Browse a ",
+                html.A(
+                    "Stata collection JSON definition",
+                    href="https://www.stata.com/manuals/tablescollectsave.pdf",
+                    target="_blank"
+                ),
 
+                html.Br(),
+
+                html.A(
+                    "The default collection is defined in Stata forum post",
+                    href=" https://www.statalist.org/forums/forum/general-stata-discussion/general/1779465-counting-elements-in-a-collection?p=1779559#post1779559",
+                    target="_blank"
+                ),
+
+                html.Br(),
+
+                "Default filtering is derived from layout showing only data related to statistics defined in result, omitting base levels.",
+
+            ],
+            style={"marginBottom": "1rem",
+                   "fontStyle": "italic", "color": "#555"}
+        ),
         dbc.Row([
             dbc.Col([
                 dbc.Label("Enter JSON Source URL or File Path"),
@@ -25,7 +46,8 @@ def create_layout():
 
                 dcc.Upload(
                     id='upload-json',
-                    children=html.Div(['Drag and Drop or ', html.A('Select a JSON file')]),
+                    children=html.Div(
+                        ['Drag and Drop or ', html.A('Select a JSON file')]),
                     style={
                         'width': '100%',
                         'height': '60px',
@@ -55,10 +77,12 @@ def create_layout():
                     label_style={"marginLeft": "0.5rem"},
                 ),
                 dbc.Label("Include Regex (filter to include keys matching)"),
-                dcc.Input(id="include-regex", type="text", value=r"_r_b|_r_se", debounce=True, style={"width": "100%"}),
+                dcc.Input(id="include-regex", type="text", value=r"_r_b|_r_se",
+                          debounce=True, style={"width": "100%"}),
                 html.Br(), html.Br(),
                 dbc.Label("Exclude Regex (filter to exclude keys matching)"),
-                dcc.Input(id="exclude-regex", type="text", debounce=True, style={"width": "100%"}),
+                dcc.Input(id="exclude-regex", type="text",
+                          debounce=True, style={"width": "100%"}),
             ], width=12)
         ]),
         html.Hr(),
