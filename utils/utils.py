@@ -34,6 +34,10 @@ def filter_items(items_dict, include_regex, exclude_regex, omit_base):
         filtered[k] = v
     return filtered
 
+import uuid
+from dash import html
+import dash_bootstrap_components as dbc
+
 def json_to_accordion(data, include_regex, exclude_regex, omit_base, parent_key="root", level=0):
     components = []
     if isinstance(data, dict):
@@ -43,22 +47,39 @@ def json_to_accordion(data, include_regex, exclude_regex, omit_base, parent_key=
                 length = len(filtered_items)
                 item_id = str(uuid.uuid4())
                 children = json_to_accordion(filtered_items, include_regex, exclude_regex, omit_base, parent_key=key, level=level + 1)
-                title = f"{key} [{length}]"
+                title = html.Span([key + " ", html.B(f"{{{length}}}")])
                 components.append(dbc.AccordionItem(title=title, children=children, item_id=item_id))
             else:
-                if isinstance(value, (dict, list)):
+                if isinstance(value, dict):
                     length = len(value)
                     children = json_to_accordion(value, include_regex, exclude_regex, omit_base, parent_key=key, level=level + 1)
-                    title = f"{key} [{length}]"
+                    title = html.Span([key + " ", html.B(f"{{{length}}}")])
+                    components.append(dbc.AccordionItem(title=title, children=children, item_id=str(uuid.uuid4())))
+                elif isinstance(value, list):
+                    length = len(value)
+                    children = json_to_accordion(value, include_regex, exclude_regex, omit_base, parent_key=key, level=level + 1)
+                    title = html.Span([key + " ", html.B(f"[{length}]")])
                     components.append(dbc.AccordionItem(title=title, children=children, item_id=str(uuid.uuid4())))
                 else:
-                    components.append(html.Div(f"{key}: {value}", style={"marginLeft": f"{level * 20}px"}))
+                    components.append(
+                        html.Div([
+                            html.Span(f"{key}: "),
+                            html.Span(str(value), style={"color": "#008B8B"})
+                        ], style={"marginLeft": f"{level * 20}px"})
+                    )
     elif isinstance(data, list):
         for i, item in enumerate(data):
             children = json_to_accordion(item, include_regex, exclude_regex, omit_base, parent_key=f"{parent_key}[{i}]", level=level + 1)
             length = len(item) if isinstance(item, (list, dict)) else 0
-            title = f"{parent_key}[{i}] [{length}]"
+            if isinstance(item, dict):
+                title = html.Span([f"{parent_key}[{i}] ", html.B(f"{{{length}}}")])
+            elif isinstance(item, list):
+                title = html.Span([f"{parent_key}[{i}] ", html.B(f"[{length}]")])
+            else:
+                title = f"{parent_key}[{i}]"
             components.append(dbc.AccordionItem(title=title, children=children, item_id=str(uuid.uuid4())))
     else:
-        components.append(html.Div(str(data), style={"marginLeft": f"{level * 20}px"}))
+        components.append(
+            html.Div(html.Span(str(data), style={"color": "#008B8B"}), style={"marginLeft": f"{level * 20}px"})
+        )
     return components
